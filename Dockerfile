@@ -16,6 +16,8 @@ RUN export CONTAINER_USER=logrotate && \
       tar \
       gzip \
       wget \
+      tini \
+      bash \
       tzdata && \
     if  [ "${LOGROTATE_VERSION}" = "latest" ]; \
       then apk add logrotate ; \
@@ -24,8 +26,6 @@ RUN export CONTAINER_USER=logrotate && \
     mkdir -p /usr/bin/logrotate.d && \
     wget --no-check-certificate -O /tmp/go-cron.tar.gz https://github.com/michaloo/go-cron/releases/download/v0.0.2/go-cron.tar.gz && \
     tar xvf /tmp/go-cron.tar.gz -C /usr/bin && \
-    curl https://github.com/krallin/tini/releases/download/v0.18.0/tini -o /tini && \
-    chmod +x /tini && \
     apk del \
       wget && \
     rm -rf /var/cache/apk/* && rm -rf /tmp/*
@@ -50,7 +50,7 @@ COPY logrotate.sh /usr/bin/logrotate.d/logrotate.sh
 COPY logrotateConf.sh /usr/bin/logrotate.d/logrotateConf.sh
 COPY logrotateCreateConf.sh /usr/bin/logrotate.d/logrotateCreateConf.sh
 
-ENTRYPOINT ["/tini","--","/usr/bin/logrotate.d/docker-entrypoint.sh"]
+ENTRYPOINT ["tini","--","/usr/bin/logrotate.d/docker-entrypoint.sh"]
 VOLUME ["/logrotate-status"]
 CMD ["cron"]
 
